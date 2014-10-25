@@ -1,0 +1,29 @@
+=== CHANGE LOG ===
+v1.2.2
+[Updated] - Compatibility with RealChute 1.0.3
+[Fixed] - Broken reference to config.xml to adjust ground dewarp altitude
+[Fixed] - Incorrect altitude reading above water (again)
+
+v1.2.1
+[Fixed] - Null Reference error when starting up the game (thx to Llorx)
+
+v1.2
+[Changed] - Altitude buffer, now turns down timewarp based on state
+[Added] - Compatibility for Real Chute mod (optional)
+NOTE: uninstall first if version is v1.1 or earlier
+
+v1.1.1
+[Changed] - updated folder structure (uninstall previous versions)
+
+v1.1
+[Fixed] - should now work properly during water landings
+[Fixed] - properly updates when switching vessels or docking/undocking
+[Changed] - gets deploy altitudes from ModuleParachute data (should work with other mod parts)
+[Changed] - does not run altitude checks if not Time Warping
+[Changed] - does not run altitude checks if parachutes are not deployed
+[Added] - config.xml to change altitude settings
+[Added] - stop Time Warp when reaching ground
+[Added] - does not run altitude checks over a max altitude
+
+v1.0
+initial release
