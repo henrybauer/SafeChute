@@ -1,3 +1,4 @@
+#define DEBUG
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -89,27 +90,21 @@ namespace GenesisRage
 					// only proceed if current altitude is within range
 					if (alt > 0.0f && alt < maxAlt)
 					{
-						foreach (SafeChutePart part in safeParts)
-						{
-							if (part.isRealChute)
-							{
+						foreach (SafeChutePart part in safeParts) {
+							if (part.isRealChute) {
 								// real chute calculations here
-								bool mDrag = ((string)part.partModule.GetType().GetField("depState").GetValue(part.partModule) == "PREDEPLOYED" ||
-								              (string)part.partModule.GetType().GetField("secDepState").GetValue(part.partModule) == "PREDEPLOYED");
-								bool mOpen = ((string)part.partModule.GetType().GetField("depState").GetValue(part.partModule) == "DEPLOYED" ||
-								              (string)part.partModule.GetType().GetField("secDepState").GetValue(part.partModule) == "DEPLOYED");
+								bool anydeployed = (bool)part.partModule.GetType ().GetProperty ("anyDeployed").GetValue (part.partModule, null);
 
-								if (!part.safetyActive && mDrag)
+								if (!part.safetyActive && anydeployed)
 								{
 									part.safetyActive = true;
 								}
-								else if (part.safetyActive && mOpen)
+								else if (part.safetyActive && !part.groundSafety && anydeployed)
 								{
-									part.safetyActive = false;
+									part.groundSafety = false;
 									part.groundSafety = true;
-									TimeWarp.SetRate(0, true);
+									TimeWarp.SetRate (0, true);
 								}
-
 							} else {
 								bool mDrag = (((ModuleParachute)part.partModule).deploymentState == ModuleParachute.deploymentStates.SEMIDEPLOYED);
 								bool mOpen = (((ModuleParachute)part.partModule).deploymentState == ModuleParachute.deploymentStates.DEPLOYED);
@@ -151,14 +146,18 @@ namespace GenesisRage
 				{
 					if (part.isRealChute)
 					{
-						GUILayout.Label("(" + i + ")" +
-						                " STATE:" + part.partModule.GetType().GetField("depState").GetValue(part.partModule) +
-										" STATE:" + part.partModule.GetType().GetField("secDepState").GetValue(part.partModule));
+						int numChutes = (int)part.partModule.GetType ().GetField ("parachutes").GetValue(part.partModule).GetType ().GetProperty("Count").GetValue(part.partModule.GetType ().GetField ("parachutes").GetValue(part.partModule),null);
+						bool anydeployed = (bool)part.partModule.GetType ().GetProperty ("anyDeployed").GetValue (part.partModule, null);
+
+						GUILayout.Label ("(" + i + ")");
+						GUILayout.Label (" numChutes:" + numChutes);
+						GUILayout.Label (" anydeployed:" + anydeployed);
+
 					}
-						GUILayout.Label("(" + i + ")" +
-//					                " RC:" + part.isRealChute +
-					                " SA:" + part.safetyActive +
-					                " GS:" + part.groundSafety);
+					GUILayout.Label ("(" + i + ")");
+					GUILayout.Label(" RC:" + part.isRealChute);
+					GUILayout.Label(" SA:" + part.safetyActive);
+					GUILayout.Label(" GS:" + part.groundSafety);
 					i++;
 				}
 				GUILayout.EndVertical();
