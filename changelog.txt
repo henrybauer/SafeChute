@@ -1,4 +1,15 @@
 === CHANGE LOG ===
+v1.3.2
+[Fixed] - update changelog and .version
+
+v1.3a (unreleased)
+[Fixed] - Removed DEBUG
+
+v1.3  (unreleased)
+[Added] - KSP-AVC version checking compatibility (http://forum.kerbalspaceprogram.com/threads/79745)
+[Fixed] - Recompiled for 0.25
+[Fixed] - Updated RealChute compatibility, however it stops warp on semi-deployment and near-ground, not deployment and near-ground like it should
+
 v1.2.2
 [Updated] - Compatibility with RealChute 1.0.3
 [Fixed] - Broken reference to config.xml to adjust ground dewarp altitude
