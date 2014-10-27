@@ -90,35 +90,36 @@ namespace GenesisRage
 					if (alt > 0.0f && alt < maxAlt)
 					{
 						foreach (SafeChutePart part in safeParts) {
+							bool mDrag = false;
+							bool mOpen = false;
+
 							if (part.isRealChute) {
-								// real chute calculations here
-								bool anydeployed = (bool)part.partModule.GetType ().GetProperty ("anyDeployed").GetValue (part.partModule, null);
+								string depState = "";
+								foreach (var p in (System.Collections.IList)part.partModule.GetType ().GetField ("parachutes").GetValue (part.partModule)) {
+									depState = (string)p.GetType ().GetField ("depState").GetValue (p);
+									if (depState == "PREDEPLOYED") {
+										mDrag = true;
+									} else if (depState == "DEPLOYED") {
+										mOpen = true;
+									}
+								}
 
-								if (!part.safetyActive && anydeployed)
-								{
-									part.safetyActive = true;
-								}
-								else if (part.safetyActive && !part.groundSafety && anydeployed)
-								{
-									part.groundSafety = false;
-									part.groundSafety = true;
-									TimeWarp.SetRate (0, true);
-								}
 							} else {
-								bool mDrag = (((ModuleParachute)part.partModule).deploymentState == ModuleParachute.deploymentStates.SEMIDEPLOYED);
-								bool mOpen = (((ModuleParachute)part.partModule).deploymentState == ModuleParachute.deploymentStates.DEPLOYED);
-
-								if (!part.safetyActive && mDrag)
-								{
-									part.safetyActive = true;
-								}
-								else if (part.safetyActive && mOpen)
-								{
-									part.safetyActive = false;
-									part.groundSafety = true;
-									TimeWarp.SetRate(0, true);
-								}
+								mDrag = (((ModuleParachute)part.partModule).deploymentState == ModuleParachute.deploymentStates.SEMIDEPLOYED);
+								mOpen = (((ModuleParachute)part.partModule).deploymentState == ModuleParachute.deploymentStates.DEPLOYED);
 							}
+
+							if (!part.safetyActive && mDrag)
+							{
+								part.safetyActive = true;
+							}
+							else if (part.safetyActive && mOpen)
+							{
+								part.safetyActive = false;
+								part.groundSafety = true;
+								TimeWarp.SetRate(0, true);
+							}
+
 
 							if (part.groundSafety && ((altGrnd > 0.0f && altGrnd < deWarpGrnd) || (alt > 0.0f && alt < deWarpGrnd)))
 							{
@@ -143,20 +144,29 @@ namespace GenesisRage
 				GUILayout.Label("DeWarp:" + deWarpGrnd + " Current:" + vessel.GetHeightFromTerrain() + "/" + (float)vessel.altitude);
 				foreach (SafeChutePart part in safeParts)
 				{
+					GUILayout.Label ("Part number: " + i);
+					GUILayout.Label(" isRealChute:" + part.isRealChute);
+					GUILayout.Label(" safetyActive:" + part.safetyActive);
+					GUILayout.Label(" groundSafety:" + part.groundSafety);
+
 					if (part.isRealChute)
 					{
-						int numChutes = (int)part.partModule.GetType ().GetField ("parachutes").GetValue(part.partModule).GetType ().GetProperty("Count").GetValue(part.partModule.GetType ().GetField ("parachutes").GetValue(part.partModule),null);
+						var chutesArrayObj = part.partModule.GetType ().GetField ("parachutes").GetValue (part.partModule);
+
+						int numChutes = (int)chutesArrayObj.GetType ().GetProperty("Count").GetValue(chutesArrayObj,null);
+
 						bool anydeployed = (bool)part.partModule.GetType ().GetProperty ("anyDeployed").GetValue (part.partModule, null);
 
-						GUILayout.Label ("(" + i + ")");
-						GUILayout.Label (" numChutes:" + numChutes);
+						GUILayout.Label (" numChutes in part:" + numChutes);
 						GUILayout.Label (" anydeployed:" + anydeployed);
 
+						int pNumber = 0;
+						foreach (var p in (System.Collections.IList)chutesArrayObj) {
+							GUILayout.Label (pNumber + " state: [" + (string)p.GetType ().GetField ("depState").GetValue (p)+"]");
+							pNumber++;
+						}
+
 					}
-					GUILayout.Label ("(" + i + ")");
-					GUILayout.Label(" RC:" + part.isRealChute);
-					GUILayout.Label(" SA:" + part.safetyActive);
-					GUILayout.Label(" GS:" + part.groundSafety);
 					i++;
 				}
 				GUILayout.EndVertical();
