@@ -1,4 +1,7 @@
 === CHANGE LOG ===
+v1.4
+[Fixed] - Fixed RealChutes
+
 v1.3.2
 [Fixed] - update changelog and .version
 
