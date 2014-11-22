@@ -41,6 +41,7 @@ namespace GenesisRage
 
 			deWarpGrnd = (float)cfg.GetValue<double>("DeWarpGround", 15.0f);
 			maxAlt = (float)cfg.GetValue<double>("MaxAltitude", 10000.0f);
+			Debug.Log (String.Format("SafeChute values: DeWarpGround = {0}, MaxAltitude = {1}", deWarpGrnd, maxAlt));
 		}
 		
 		public void Start()

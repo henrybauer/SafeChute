@@ -1,4 +1,7 @@
 === CHANGE LOG ===
+v1.5
+[Fixed] - Put the config.xml back in the ZIP file
+
 v1.4
 [Fixed] - Fixed RealChutes
 
