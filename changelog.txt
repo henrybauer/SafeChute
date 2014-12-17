@@ -1,4 +1,7 @@
 === CHANGE LOG ===
+v1.6
+[Updated] - Recompiled for 0.90, no real changes
+
 v1.5
 [Fixed] - Put the config.xml back in the ZIP file
 
