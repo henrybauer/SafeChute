@@ -9,8 +9,8 @@ namespace GenesisRage
 	public class SafeChutePart
 	{
 		public object partModule;
-		public bool safetyActive = false;
-		public bool groundSafety = false;
+		public bool dewarpedAtDeploy = false;
+		public bool dewarpedAtGroundd = false;
 		public bool isRealChute = false;
 
 		public SafeChutePart(PartModule pm)
@@ -74,7 +74,7 @@ namespace GenesisRage
 		
 		public void FixedUpdate()
 		{
-			if (HighLogic.LoadedScene == GameScenes.FLIGHT)
+			if (HighLogic.LoadedScene == GameScenes.FLIGHT && FlightGlobals.ActiveVessel.situation == Vessel.Situations.FLYING && TimeWarp.CurrentRateIndex > 0 )
 			{
 				// check to see if switching avtive vessel, or un/docking
 				if (vessel != FlightGlobals.ActiveVessel || vesselParts != FlightGlobals.ActiveVessel.parts.Count)
@@ -82,7 +82,7 @@ namespace GenesisRage
 					ListChutes();
 				
 				// only proceed if the active vessel has parachutes and time warping
-				if (safeParts.Count > 0 && TimeWarp.CurrentRateIndex > 0)
+				if (safeParts.Count > 0)
 				{
 					float alt = (float)vessel.altitude;
 					float altGrnd = vessel.GetHeightFromTerrain();
@@ -91,40 +91,30 @@ namespace GenesisRage
 					if (alt > 0.0f && alt < maxAlt)
 					{
 						foreach (SafeChutePart part in safeParts) {
-							bool mDrag = false;
 							bool mOpen = false;
 
 							if (part.isRealChute) {
 								string depState = "";
 								foreach (var p in (System.Collections.IList)part.partModule.GetType ().GetField ("parachutes").GetValue (part.partModule)) {
 									depState = (string)p.GetType ().GetField ("depState").GetValue (p);
-									if (depState == "PREDEPLOYED") {
-										mDrag = true;
-									} else if (depState == "DEPLOYED") {
+									if (depState == "DEPLOYED") {
 										mOpen = true;
 									}
 								}
 
 							} else {
-								mDrag = (((ModuleParachute)part.partModule).deploymentState == ModuleParachute.deploymentStates.SEMIDEPLOYED);
 								mOpen = (((ModuleParachute)part.partModule).deploymentState == ModuleParachute.deploymentStates.DEPLOYED);
 							}
 
-							if (!part.safetyActive && mDrag)
+							if (!part.dewarpedAtDeploy && mOpen)
 							{
-								part.safetyActive = true;
-							}
-							else if (part.safetyActive && mOpen)
-							{
-								part.safetyActive = false;
-								part.groundSafety = true;
+								part.dewarpedAtDeploy = true;
 								TimeWarp.SetRate(0, true);
 							}
-
-
-							if (part.groundSafety && ((altGrnd > 0.0f && altGrnd < deWarpGrnd) || (alt > 0.0f && alt < deWarpGrnd)))
+								
+							if (!part.dewarpedAtGroundd && ((altGrnd < deWarpGrnd && altGrnd > 0.0f) || (alt < deWarpGrnd && alt > 0.0f)))
 							{
-								part.groundSafety = false;
+								part.dewarpedAtGroundd = true;
 								TimeWarp.SetRate(0, true);
 							}
 						}
@@ -147,8 +137,8 @@ namespace GenesisRage
 				{
 					GUILayout.Label ("Part number: " + i);
 					GUILayout.Label(" isRealChute:" + part.isRealChute);
-					GUILayout.Label(" safetyActive:" + part.safetyActive);
-					GUILayout.Label(" groundSafety:" + part.groundSafety);
+					GUILayout.Label(" dewarpedAtDeploy:" + part.dewarpedAtDeploy);
+					GUILayout.Label(" dewarpedAtGroundd:" + part.dewarpedAtGroundd);
 
 					if (part.isRealChute)
 					{
