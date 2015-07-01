@@ -1,4 +1,12 @@
 === CHANGE LOG ===
+v1.7.1
+[Updated] - Recompiled for 1.0.4
+
+v1.7
+[Updated] - Ground dewarp now activates regardless of deployment dewarp
+[Updated] - Reduced number of checks done, especially when in orbit
+[Updated] - Recompiled for 1.0.2
+
 v1.6
 [Updated] - Recompiled for 0.90, no real changes
 
