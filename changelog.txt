@@ -1,4 +1,10 @@
 === CHANGE LOG ===
+v1.9.1
+[Updated] - Recompiled for 1.1.2
+
+v1.9.0
+[Updated] - Recompiled for 1.1
+
 v1.8.0
 [Updated] - Recompiled for 1.0.5
 
