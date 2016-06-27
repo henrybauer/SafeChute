@@ -12,15 +12,13 @@ namespace GenesisRage
 		public bool dewarpedAtDeploy = false;
 		public bool dewarpedAtGroundd = false;
 		public bool isRealChute = false;
+		public bool isFARChute = false;
 
-		public SafeChutePart(PartModule pm)
-		{
-			partModule = pm;
-		}
-		public SafeChutePart(PartModule pm, bool rc)
+		public SafeChutePart(PartModule pm, bool rc, bool fc)
 		{
 			partModule = pm;
 			isRealChute = rc;
+			isFARChute = fc;
 		}
 	}
 
@@ -60,13 +58,11 @@ namespace GenesisRage
 			{
 				foreach (PartModule pm in p.Modules)
 				{
-					if (pm.moduleName == "ModuleParachute")
+					switch (pm.moduleName)
 					{
-						safeParts.Add(new SafeChutePart(pm));
-					}
-					if (pm.moduleName == "RealChuteModule")
-					{
-						safeParts.Add(new SafeChutePart(pm, true));
+						case "ModuleParachute": safeParts.Add(new SafeChutePart(pm, false, false)); break;
+						case "RealChuteModule": safeParts.Add(new SafeChutePart(pm, true, false)); break;
+						case "RealChuteFAR":    safeParts.Add(new SafeChutePart(pm, false, true)); break;
 					}
 				}
 			}
@@ -102,6 +98,13 @@ namespace GenesisRage
 									}
 								}
 
+							} else if (part.isFARChute) {
+								string depState = "";
+								depState = (string)part.partModule.GetType().GetField("depState").GetValue(part.partModule);
+								if (depState == "DEPLOYED")
+								{
+									mOpen = true;
+								}
 							} else {
 								mOpen = (((ModuleParachute)part.partModule).deploymentState == ModuleParachute.deploymentStates.DEPLOYED);
 							}
@@ -109,13 +112,13 @@ namespace GenesisRage
 							if (!part.dewarpedAtDeploy && mOpen)
 							{
 								part.dewarpedAtDeploy = true;
-								TimeWarp.SetRate(0, true);
+								TimeWarp.SetRate(0, true, true);
 							}
 								
 							if (!part.dewarpedAtGroundd && ((altGrnd < deWarpGrnd && altGrnd > 0.0f) || (alt < deWarpGrnd && alt > 0.0f)))
 							{
 								part.dewarpedAtGroundd = true;
-								TimeWarp.SetRate(0, true);
+								TimeWarp.SetRate (0, true, true);
 							}
 						}
 					}
