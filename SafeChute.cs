@@ -6,20 +6,67 @@ using UnityEngine;
 
 namespace GenesisRage
 {
-	public class SafeChutePart
+	public abstract class SafeChutePart
 	{
 		public object partModule;
 		public bool dewarpedAtDeploy = false;
-		public bool dewarpedAtGroundd = false;
+		public bool dewarpedAtGround = false;
 		public bool isRealChute = false;
 		public bool isFARChute = false;
 
-		public SafeChutePart(PartModule pm, bool rc, bool fc)
+		public SafeChutePart(PartModule pm)
 		{
 			partModule = pm;
-			isRealChute = rc;
-			isFARChute = fc;
+#if DEBUG
+			SafeChuteModule.SCprint("Added SafeChutePart with module "+pm.moduleName +
+			                        " from part "+pm.part.name);
+#endif
 		}
+		public abstract bool isDeployed();
+	}
+
+	public class SafeChuteFARPart : SafeChutePart
+	{
+		public override bool isDeployed()
+		{
+			return ((string)partModule.GetType().GetField("depState").GetValue(partModule) == "DEPLOYED");
+		}
+
+		public SafeChuteFARPart(PartModule pm) : base(pm)
+		{}
+
+	}
+
+	public class SafeChuteRCPart : SafeChutePart
+	{
+		public override bool isDeployed()
+		{
+			System.Collections.IList pms = (System.Collections.IList)partModule.GetType().GetField("parachutes").GetValue(partModule);
+			for (int i = pms.Count - 1; i >= 0; --i)
+			{
+				if ((string)pms[i].GetType().GetField("depState").GetValue(pms[i]) == "DEPLOYED")
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public SafeChuteRCPart(PartModule pm) : base(pm)
+		{}
+
+	}
+
+	public class SafeChuteStockPart:SafeChutePart
+	{
+		public override bool isDeployed()
+		{
+			return (((ModuleParachute)partModule).deploymentState == ModuleParachute.deploymentStates.DEPLOYED);
+		}
+
+		public SafeChuteStockPart(PartModule pm):base(pm)
+		{}
+
 	}
 
 	[KSPAddon(KSPAddon.Startup.Flight, false)]
@@ -27,8 +74,7 @@ namespace GenesisRage
 	{
 		Vessel vessel;
 		float deWarpGrnd;
-		float maxAlt;
-		int vesselParts = 0;
+		double maxAlt;
 		List<SafeChutePart> safeParts = new List<SafeChutePart>();
 		
 		public void Awake()
@@ -38,31 +84,37 @@ namespace GenesisRage
 			cfg.load();
 
 			deWarpGrnd = (float)cfg.GetValue<double>("DeWarpGround", 15.0f);
-			maxAlt = (float)cfg.GetValue<double>("MaxAltitude", 10000.0f);
-			Debug.Log (String.Format("SafeChute values: DeWarpGround = {0}, MaxAltitude = {1}", deWarpGrnd, maxAlt));
+			maxAlt = (double)cfg.GetValue<double>("MaxAltitude", 10000.0f);
+			SCprint (String.Format("DeWarpGround = {0}, MaxAltitude = {1}", deWarpGrnd, maxAlt));
 		}
 		
 		public void Start()
 		{
 			ListChutes();
+			GameEvents.onVesselWasModified.Add(ListChutes);
+			GameEvents.onVesselChange.Add(ListChutes);
 		}
-		
-		public void ListChutes()
+
+		public void ListChutes(Vessel gameEventVessel=null)
 		{
+#if DEBUG
+			SCprint("ListChutes");
+#endif
 			vessel = FlightGlobals.ActiveVessel;
-			vesselParts = vessel.parts.Count;
 			safeParts.Clear();
 
 			// grab every parachute part from active vessel
-			foreach (Part p in vessel.parts)
-			{
-				foreach (PartModule pm in p.Modules)
-				{
-					switch (pm.moduleName)
+
+			for (int i = vessel.Parts.Count - 1; i >= 0; --i){
+				for (int j = vessel.parts[i].Modules.Count - 1; j >= 0; --j){
+#if DEBUG
+					SCprint(i.ToString() + "/" + j.ToString() + ": " + vessel.parts[i].Modules[j].moduleName);
+#endif
+					switch (vessel.parts[i].Modules[j].moduleName)
 					{
-						case "ModuleParachute": safeParts.Add(new SafeChutePart(pm, false, false)); break;
-						case "RealChuteModule": safeParts.Add(new SafeChutePart(pm, true, false)); break;
-						case "RealChuteFAR":    safeParts.Add(new SafeChutePart(pm, false, true)); break;
+						case "ModuleParachute": safeParts.Add(new SafeChuteStockPart(vessel.parts[i].Modules[j])); break;
+						case "RealChuteModule": safeParts.Add(new SafeChuteRCPart   (vessel.parts[i].Modules[j])); break;
+						case "RealChuteFAR":    safeParts.Add(new SafeChuteFARPart  (vessel.parts[i].Modules[j])); break;
 					}
 				}
 			}
@@ -70,55 +122,34 @@ namespace GenesisRage
 		
 		public void FixedUpdate()
 		{
-			if (HighLogic.LoadedScene == GameScenes.FLIGHT && FlightGlobals.ActiveVessel.situation == Vessel.Situations.FLYING && TimeWarp.CurrentRateIndex > 0 )
+			// only proceed if we're FLYING and time warp is engaged
+			if (FlightGlobals.ActiveVessel.situation == Vessel.Situations.FLYING
+			    && TimeWarp.CurrentRateIndex > 0 )
 			{
-				// check to see if switching avtive vessel, or un/docking
-				if (vessel != FlightGlobals.ActiveVessel || vesselParts != FlightGlobals.ActiveVessel.parts.Count)
-					// re-grab parachute parts
-					ListChutes();
-				
-				// only proceed if the active vessel has parachutes and time warping
+				// only proceed if the active vessel has parachutes
 				if (safeParts.Count > 0)
 				{
-					float alt = (float)vessel.altitude;
-					float altGrnd = vessel.GetHeightFromTerrain();
-					
 					// only proceed if current altitude is within range
+					double alt = vessel.altitude;
 					if (alt > 0.0f && alt < maxAlt)
 					{
-						foreach (SafeChutePart part in safeParts) {
-							bool mOpen = false;
-
-							if (part.isRealChute) {
-								string depState = "";
-								foreach (var p in (System.Collections.IList)part.partModule.GetType ().GetField ("parachutes").GetValue (part.partModule)) {
-									depState = (string)p.GetType ().GetField ("depState").GetValue (p);
-									if (depState == "DEPLOYED") {
-										mOpen = true;
-									}
-								}
-
-							} else if (part.isFARChute) {
-								string depState = "";
-								depState = (string)part.partModule.GetType().GetField("depState").GetValue(part.partModule);
-								if (depState == "DEPLOYED")
-								{
-									mOpen = true;
-								}
-							} else {
-								mOpen = (((ModuleParachute)part.partModule).deploymentState == ModuleParachute.deploymentStates.DEPLOYED);
-							}
-
-							if (!part.dewarpedAtDeploy && mOpen)
+						for (int i = safeParts.Count - 1; i >= 0; --i)
+						{
+							if (!safeParts[i].dewarpedAtDeploy && safeParts[i].isDeployed())
 							{
-								part.dewarpedAtDeploy = true;
+								safeParts[i].dewarpedAtDeploy = true;
 								TimeWarp.SetRate(0, true, true);
 							}
-								
-							if (!part.dewarpedAtGroundd && ((altGrnd < deWarpGrnd && altGrnd > 0.0f) || (alt < deWarpGrnd && alt > 0.0f)))
+
+							if (!safeParts[i].dewarpedAtGround)
 							{
-								part.dewarpedAtGroundd = true;
-								TimeWarp.SetRate (0, true, true);
+								float altGrnd = vessel.GetHeightFromTerrain();
+								if ((altGrnd < deWarpGrnd && altGrnd > 0.0f)
+																|| (alt < deWarpGrnd && alt > 0.0f))
+								{
+									safeParts[i].dewarpedAtGround = true;
+									TimeWarp.SetRate(0, true, true);
+								}
 							}
 						}
 					}
@@ -135,39 +166,29 @@ namespace GenesisRage
 				GUILayout.BeginArea(new Rect(100,100,400,400));
 				GUILayout.BeginVertical("box");
 				int i = 0;
-				GUILayout.Label("DeWarp:" + deWarpGrnd + " Current:" + vessel.GetHeightFromTerrain() + "/" + (float)vessel.altitude);
+				GUILayout.Label("SafeChute");
+				GUILayout.Label("DeWarp:" + deWarpGrnd +
+				                " Current:" + vessel.GetHeightFromTerrain().ToString("F02") +
+				                "/" + vessel.altitude.ToString("F02"));
 				foreach (SafeChutePart part in safeParts)
 				{
-					GUILayout.Label ("Part number: " + i);
-					GUILayout.Label(" isRealChute:" + part.isRealChute);
-					GUILayout.Label(" dewarpedAtDeploy:" + part.dewarpedAtDeploy);
-					GUILayout.Label(" dewarpedAtGroundd:" + part.dewarpedAtGroundd);
-
-					if (part.isRealChute)
-					{
-						var chutesArrayObj = part.partModule.GetType ().GetField ("parachutes").GetValue (part.partModule);
-
-						int numChutes = (int)chutesArrayObj.GetType ().GetProperty("Count").GetValue(chutesArrayObj,null);
-
-						bool anydeployed = (bool)part.partModule.GetType ().GetProperty ("anyDeployed").GetValue (part.partModule, null);
-
-						GUILayout.Label (" numChutes in part:" + numChutes);
-						GUILayout.Label (" anydeployed:" + anydeployed);
-
-						int pNumber = 0;
-						foreach (var p in (System.Collections.IList)chutesArrayObj) {
-							GUILayout.Label (pNumber + " state: [" + (string)p.GetType ().GetField ("depState").GetValue (p)+"]");
-							pNumber++;
-						}
-
-					}
+					GUILayout.Label("#" + i.ToString()+
+					                " dewarpedAtDeploy:" + part.dewarpedAtDeploy +
+					                " dewarpedAtGround:" + part.dewarpedAtGround);
 					i++;
 				}
+
 				GUILayout.EndVertical();
 				GUILayout.EndArea();
 				GUI.enabled = true;
 			}
 		}
 #endif
+
+		static public void SCprint(string tacos)
+		{
+			print("[SafeChute]: " + tacos); // tacos are awesome
+		}
+
 	}
 }
