@@ -1,4 +1,7 @@
 === CHANGE LOG ===
+v2.1
+[Updated] - Optimization and code cleanup
+
 v2.0
 [Updated] - Add support for FAR chutes, fixes for 1.1.3
 
