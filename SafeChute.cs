@@ -91,8 +91,9 @@ namespace GenesisRage
 		public void Start()
 		{
 			ListChutes();
-			GameEvents.onVesselWasModified.Add(ListChutes);
-			GameEvents.onVesselChange.Add(ListChutes);
+			GameEvents.onVesselStandardModification.Add(ListChutes);
+			// onVesselStandardModification collects various vessel events and fires them off with a single one.
+			// Specifically - onPartAttach,onPartRemove,onPartCouple,onPartDie,onPartUndock,onVesselWasModified,onVesselPartCountChanged
 		}
 
 		public void ListChutes(Vessel gameEventVessel=null)
