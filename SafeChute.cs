@@ -91,6 +91,8 @@ namespace GenesisRage
 		public void Start()
 		{
 			ListChutes();
+			GameEvents.onVesselChange.Add(ListChutes);
+			// onVesselChange - switching between vessels with [ or ] keys
 			GameEvents.onVesselStandardModification.Add(ListChutes);
 			// onVesselStandardModification collects various vessel events and fires them off with a single one.
 			// Specifically - onPartAttach,onPartRemove,onPartCouple,onPartDie,onPartUndock,onVesselWasModified,onVesselPartCountChanged
@@ -144,7 +146,7 @@ namespace GenesisRage
 
 							if (!safeParts[i].dewarpedAtGround)
 							{
-								float altGrnd = vessel.GetHeightFromTerrain();
+								float altGrnd = (float)vessel.radarAltitude;
 								if ((altGrnd < deWarpGrnd && altGrnd > 0.0f)
 																|| (alt < deWarpGrnd && alt > 0.0f))
 								{
@@ -170,7 +172,8 @@ namespace GenesisRage
 				GUILayout.Label("SafeChute");
 				GUILayout.Label("DeWarp:" + deWarpGrnd +
 				                " Current:" + vessel.GetHeightFromTerrain().ToString("F02") +
-				                "/" + vessel.altitude.ToString("F02"));
+				                "/" + vessel.altitude.ToString("F02") +
+				                "/" + vessel.radarAltitude.ToString("F02"));
 				foreach (SafeChutePart part in safeParts)
 				{
 					GUILayout.Label("#" + i.ToString()+
