@@ -171,7 +171,7 @@ namespace GenesisRage
 				int i = 0;
 				GUILayout.Label("SafeChute");
 				GUILayout.Label("DeWarp:" + deWarpGrnd +
-				                " Current:" + vessel.GetHeightFromTerrain().ToString("F02") +
+				                " Current:" + vessel.heightFromTerrain.ToString("F02") +
 				                "/" + vessel.altitude.ToString("F02") +
 				                "/" + vessel.radarAltitude.ToString("F02"));
 				foreach (SafeChutePart part in safeParts)
