@@ -1,11 +1,15 @@
 === CHANGE LOG ===
+v2.1.3
+[Updated] - Recompiled for KSP 1.2 release
+[Updated] - switch from GetHeightFromTerrain() to heightFromTerrain in debug code
+
 v2.1.2
 [Updated] - added GameEvents.onVesselChange to capture vessel switch
 [Updated] - use radaraltitude to fix water landings
 
 v2.1.1
 [Updated] - Switched to GameEvents.onVesselStandardModification
-[Updated] - Recompiled for KSP 1.2
+[Updated] - Recompiled for KSP 1.2 pre-release
 
 v2.1
 [Updated] - Optimization and code cleanup
