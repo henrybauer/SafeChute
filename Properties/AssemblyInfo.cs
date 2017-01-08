@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("SafeChute")]
-[assembly: AssemblyCopyright("9999 2013 Genesis Rage; 2016 Henry Bauer")]
+[assembly: AssemblyCopyright("2013 Genesis Rage; 2016 Henry Bauer")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -29,5 +29,5 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("2.1.5")]
-[assembly: AssemblyFileVersion("2.1.5")]
+[assembly: AssemblyVersion("2.1.6")]
+[assembly: AssemblyFileVersion("2.1.6")]
