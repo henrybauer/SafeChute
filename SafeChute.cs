@@ -103,12 +103,13 @@ namespace GenesisRage
 #if DEBUG
 			SCprint("ListChutes");
 #endif
-			vessel = FlightGlobals.ActiveVessel;
+            vessel = FlightGlobals.ActiveVessel;
+            if (vessel==null) { return; }
 			safeParts.Clear();
 
-			// grab every parachute part from active vessel
-
-			for (int i = vessel.Parts.Count - 1; i >= 0; --i){
+            // grab every parachute part from active vessel
+            if (vessel.Parts == null) { return; }
+            for (int i = vessel.Parts.Count - 1; i >= 0; --i){
 				for (int j = vessel.parts[i].Modules.Count - 1; j >= 0; --j){
 #if DEBUG
 					SCprint(i.ToString() + "/" + j.ToString() + ": " + vessel.parts[i].Modules[j].moduleName);
