@@ -1,6 +1,6 @@
 {"NAME":"SafeChute",
 "URL":"https://raw.githubusercontent.com/henrybauer/SafeChute/master/SafeChute.version",
 "DOWNLOAD":"http://forum.kerbalspaceprogram.com/threads/100855",
-"VERSION":{"MAJOR":2,"MINOR":1,"PATCH":6,"BUILD":0},
-"KSP_VERSION":{"MAJOR":1,"MINOR":2,"PATCH":2}
+"VERSION":{"MAJOR":2,"MINOR":1,"PATCH":7,"BUILD":0},
+"KSP_VERSION":{"MAJOR":1,"MINOR":3,"PATCH":0}
 }
