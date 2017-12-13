@@ -23,17 +23,34 @@ namespace GenesisRage
 		public abstract bool isDeployed();
 	}
 
-/*    public class SafeChuteSSTUPart : SafeChutePart
+    public class SafeChuteSSTUPart : SafeChutePart
     {
         public override bool isDeployed()
         {
-            return false;
+            //return (isMainChuteDeployed() || isDrogueChuteDeployed());
+            return isMainChuteDeployed();
+        }
+
+        private string getChuteState()
+        {
+            return ((string)partModule.GetType().GetField("chutePersistence").GetValue(partModule));
+        }
+
+        public bool isMainChuteDeployed()
+        {
+            string chuteState = getChuteState();
+            return chuteState.Contains("MAIN_DEPLOYING_FULL") || chuteState.Contains("MAIN_DEPLOYING_SEMI") || chuteState.Contains("MAIN_FULL_DEPLOYED") || chuteState.Contains("MAIN_SEMI_DEPLOYED");
+        }
+
+        public bool isDrogueChuteDeployed()
+        {
+            string chuteState = getChuteState();
+            return chuteState.Contains("DROGUE_DEPLOYING_FULL") || chuteState.Contains("DROGUE_DEPLOYING_SEMI") || chuteState.Contains("DROGUE_FULL_DEPLOYED") || chuteState.Contains("DROGUE_SEMI_DEPLOYED");
         }
 
         public SafeChuteSSTUPart(PartModule pm) : base(pm)
         { }
-
-    }*/
+    }
 
 
     public class SafeChuteFARPart : SafeChutePart
@@ -130,7 +147,7 @@ namespace GenesisRage
 						case "ModuleParachute":      safeParts.Add(new SafeChuteStockPart(vessel.parts[i].Modules[j])); break;
 						case "RealChuteModule":      safeParts.Add(new SafeChuteRCPart   (vessel.parts[i].Modules[j])); break;
 						case "RealChuteFAR":         safeParts.Add(new SafeChuteFARPart  (vessel.parts[i].Modules[j])); break;
-                        //case "SSTUModularParachute": safeParts.Add(new SafeChuteSSTUPart (vessel.parts[i].Modules[j])); break;
+                        case "SSTUModularParachute": safeParts.Add(new SafeChuteSSTUPart (vessel.parts[i].Modules[j])); break;
                     }
 				}
 			}

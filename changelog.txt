@@ -1,4 +1,7 @@
 === CHANGE LOG ===
+v2.1.9
+[Updated] - Initial support for SSTU.  Stops timewarp on main chute deployment.
+
 v2.1.8
 [Updated] - Recompiled for KSP 1.3.1
 
