@@ -25,10 +25,30 @@ namespace GenesisRage
 
     public class SafeChuteSSTUPart : SafeChutePart
     {
+        private bool drogueDeployed = false;
+        private bool mainDeployed = false;
+
         public override bool isDeployed()
         {
-            //return (isMainChuteDeployed() || isDrogueChuteDeployed());
-            return isMainChuteDeployed();
+            if ((!drogueDeployed) && isDrogueChuteDeployed())
+            {
+                drogueDeployed = true;
+                dewarpedAtDeploy = false;
+                return true;
+            }
+            else
+            {
+                if ((!mainDeployed) && isMainChuteDeployed())
+                {
+                    mainDeployed = true;
+                    dewarpedAtDeploy = false;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
         }
 
         private string getChuteState()
