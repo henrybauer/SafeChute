@@ -1,4 +1,7 @@
 ﻿=== CHANGE LOG ===
+v2.1.20
+[Updated] - Recompiled for KSP 1.10
+
 v2.1.19
 [Updated] - Recompiled for KSP 1.9
 
