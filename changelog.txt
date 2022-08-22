@@ -1,4 +1,8 @@
 ﻿=== CHANGE LOG ===
+
+V2.1.21 (unreleased)
+	LGG - Added code to remove methods from events when destroyed to fix memory leak
+
 v2.1.20
 [Updated] - Recompiled for KSP 1.10
 
