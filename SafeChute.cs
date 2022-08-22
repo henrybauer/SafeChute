@@ -126,6 +126,12 @@ namespace GenesisRage
 			// Specifically - onPartAttach,onPartRemove,onPartCouple,onPartDie,onPartUndock,onVesselWasModified,onVesselPartCountChanged
 		}
 
+		void OnDestroy()
+		{
+			GameEvents.onVesselChange.Remove(ListChutes);
+			GameEvents.onVesselStandardModification.Remove(ListChutes);
+		}
+
 		public void ListChutes(Vessel gameEventVessel=null)
 		{
 #if DEBUG
